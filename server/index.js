@@ -10,6 +10,7 @@ app.use(express.json());
 
 const authRoute = require('./routes/auth'); // Beolvassa az új fájlt
 app.use('/api/auth', authRoute); // Beköti az /api/auth útvonalra
+app.use('/api/workouts', require('./routes/workouts'));
 
 //Csatlakozás a MongoDB-hez
 mongoose.connect(process.env.MONGO_URI)

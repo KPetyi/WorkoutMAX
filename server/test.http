@@ -1,8 +1,35 @@
-POST http://localhost:5000/api/auth/register
+### 1. Lépés: Belépés (Hogy kapjunk egy Tokent)
+POST http://localhost:5000/api/auth/login
 Content-Type: application/json
 
 {
-  "username": "uj_tesztelo_1",
-  "email": "uj@email.hu",
-  "password": "jelszo123"
+  "email": "te.emailed@valami.hu",
+  "password": "TeJelszavad123"
+}
+
+# -> MENTS EL A VISSZAKAPOTT TOKENT! (Ami a "token": "..." után van)
+### 2. Lépés: "Ki vagyok én?" tesztelése
+GET http://localhost:5000/api/auth/me
+# IDE MÁSOLD BE AZ 1. LÉPÉSBEN KAPOTT TOKENT A "Bearer " SZÓ UTÁN:
+Authorization: Bearer IDE_MASOLD_A_TOKENT_IDEZŐJELEK_NELKUL
+### 3. Lépés: Új edzés mentése
+POST http://localhost:5000/api/workouts
+Content-Type: application/json
+# IDE IS KELL A TOKEN:
+Authorization: Bearer IDE_MASOLD_A_TOKENT_IDEZŐJELEK_NELKUL
+
+{
+  "title": "Hétfői Mell-Bicepsz",
+  "exercises": [
+    {
+      "name": "Fekvenyomás",
+      "weight": 80,
+      "reps": 8
+    },
+    {
+      "name": "Bicepsz karhajlítás",
+      "weight": 15,
+      "reps": 12
+    }
+  ]
 }
