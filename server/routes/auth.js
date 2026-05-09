@@ -1,11 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+
+//A biztonsági őr (middleware) behúzása
+const auth = require('../middleware/auth');
 
 router.post('/register', async (req, res) => {
     try {
-        //Kiszedjük az adatokat, amiket a React küldeni fog
         const { username, email, password } = req.body;
 
         //Ellenőrizzük, hogy van-e már ilyen felhasználó
@@ -34,7 +37,6 @@ router.post('/register', async (req, res) => {
         res.status(500).json({ message: "Szerverhiba történt a regisztráció során." });
     }
 });
-const jwt = require('jsonwebtoken');
 
 router.post('/login', async (req, res) => {
     try {
@@ -46,7 +48,7 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ message: "Hibás email vagy jelszó!" });
         }
 
-        //elszó ellenőrzése (összehasonlítjuk a titkosítottal)
+        //Jelszó ellenőrzése
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({ message: "Hibás email vagy jelszó!" });
@@ -66,6 +68,23 @@ router.post('/login', async (req, res) => {
 
     } catch (err) {
         res.status(500).json({ message: "Szerverhiba a bejelentkezés során." });
+    }
+});
+
+// GET /api/auth/me
+// Bejelentkezett felhasználó adatainak lekérése
+router.get('/me', auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('-password');
+
+        if (!user) {
+            return res.status(404).json({ message: "Felhasználó nem található" });
+        }
+
+        res.json(user);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Szerver hiba');
     }
 });
 

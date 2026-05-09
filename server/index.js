@@ -10,6 +10,7 @@ app.use(express.json());
 
 const authRoute = require('./routes/auth'); // Beolvassa az új fájlt
 app.use('/api/auth', authRoute); // Beköti az /api/auth útvonalra
+app.use('/api/workouts', require('./routes/workouts'));
 
 //Csatlakozás a MongoDB-hez
 mongoose.connect(process.env.MONGO_URI)
@@ -25,4 +26,7 @@ app.get('/api/teszt', (req, res) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`A szerver fut a ${PORT}-es porton!`);
+});
+app.get('/', (req, res) => {
+  res.send('A WorkoutMAX Backend szerver köszöni, jól van!');
 });

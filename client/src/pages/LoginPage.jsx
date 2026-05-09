@@ -1,7 +1,6 @@
-// src/pages/LoginPage.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; // 1. Ezt importálni kell!
+import axios from 'axios';
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -14,23 +13,23 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  // 1. Megadjuk az alap URL-t a környezeti változóból
-  const baseUrl = import.meta.env.VITE_API_URL;
+    // 1. Megadjuk az alap URL-t a környezeti változóból
+    const baseUrl = import.meta.env.VITE_API_URL;
 
-  // 2. Összerakjuk a teljes címet attól függően, hogy belépés vagy regisztráció van
-  const url = isLogin
-    ? `${baseUrl}/api/auth/login`
-    : `${baseUrl}/api/auth/register`;
+    // 2. Összerakjuk a teljes címet attól függően, hogy belépés vagy regisztráció van
+    const url = isLogin
+      ? `${baseUrl}/api/auth/login`
+      : `${baseUrl}/api/auth/register`;
 
-  const userData = isLogin
-    ? { email, password }
-    : { username, email, password };
+    const userData = isLogin
+      ? { email, password }
+      : { username, email, password };
 
-  try {
-    const res = await axios.post(url, userData);
-    // ... a többi kód marad változatlan
+    try {
+      const res = await axios.post(url, userData);
+      // ... a többi kód marad változatlan
 
       if (isLogin) {
         // Ha belépés van, elmentjük a tokent
