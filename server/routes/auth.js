@@ -34,5 +34,39 @@ router.post('/register', async (req, res) => {
         res.status(500).json({ message: "Szerverhiba történt a regisztráció során." });
     }
 });
+const jwt = require('jsonwebtoken');
+
+router.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        //Megkeressük a felhasználót az email alapján
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: "Hibás email vagy jelszó!" });
+        }
+
+        //elszó ellenőrzése (összehasonlítjuk a titkosítottal)
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: "Hibás email vagy jelszó!" });
+        }
+
+        //JWT Token generálása
+        const token = jwt.sign(
+            { id: user._id },
+            process.env.JWT_SECRET,
+            { expiresIn: '1d' }
+        );
+
+        res.json({
+            token,
+            user: { id: user._id, username: user.username, email: user.email }
+        });
+
+    } catch (err) {
+        res.status(500).json({ message: "Szerverhiba a bejelentkezés során." });
+    }
+});
 
 module.exports = router;

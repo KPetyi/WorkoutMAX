@@ -7,6 +7,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
 const authRoute = require('./routes/auth'); // Beolvassa az új fájlt
 app.use('/api/auth', authRoute); // Beköti az /api/auth útvonalra
 
