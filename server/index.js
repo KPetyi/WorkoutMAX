@@ -26,3 +26,6 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`A szerver fut a ${PORT}-es porton!`);
 });
+app.get('/', (req, res) => {
+  res.send('A WorkoutMAX Backend szerver köszöni, jól van!');
+});
