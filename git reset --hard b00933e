@@ -1,0 +1,18 @@
+[33m501c7db[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m HEAD@{0}: commit: Szerkesztés és törlés funkciók hozzáadva
+[33m5583458[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{1}: commit (merge): Merge remote-tracking branch 'origin/master'
+[33mb00933e[m HEAD@{2}: reset: moving to HEAD
+[33mb00933e[m HEAD@{3}: commit: Szerkesztés és törlés funkciók hozzáadva
+[33m7fb5999[m HEAD@{4}: commit (merge): Merge branch 'master' of https://github.com/KPetyi/WorkoutMAX
+[33m4a9ebf9[m HEAD@{5}: reset: moving to HEAD
+[33m4a9ebf9[m HEAD@{6}: reset: moving to HEAD
+[33m4a9ebf9[m HEAD@{7}: reset: moving to HEAD
+[33m4a9ebf9[m HEAD@{8}: reset: moving to HEAD
+[33m4a9ebf9[m HEAD@{9}: reset: moving to HEAD
+[33m4a9ebf9[m HEAD@{10}: reset: moving to HEAD
+[33m4a9ebf9[m HEAD@{11}: reset: moving to HEAD
+[33m4a9ebf9[m HEAD@{12}: commit: Frontend alapok mentése pull előtt
+[33m330680c[m HEAD@{13}: commit: log in es regiszter kesz
+[33m5a03eb2[m HEAD@{14}: pull origin master: Fast-forward
+[33m68b8e10[m HEAD@{15}: merge origin/master: Merge made by the 'ort' strategy.
+[33m28c305f[m HEAD@{16}: commit: frontend MVP UI routing kész
+[33mb3480f0[m HEAD@{17}: commit (initial): Repo létrehozás
