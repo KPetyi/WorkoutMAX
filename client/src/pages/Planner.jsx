@@ -1,122 +1,96 @@
-// src/pages/Planner.jsx
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom'; // useParams hozzáadva!
+import axios from 'axios';
 
 const Planner = () => {
+  const { id } = useParams(); // Megnézzük, van-e ID az URL-ben
   const navigate = useNavigate();
   const [planName, setPlanName] = useState('');
+  const [exercises, setExercises] = useState([{ id: Date.now(), name: '', weight: '', reps: '', sets: '' }]);
+  const [isEditMode, setIsEditMode] = useState(false);
 
-  // Ez az állapot tárolja a gyakorlatok listáját
-  const [exercises, setExercises] = useState([
-    { id: 1, name: '', sets: '', reps: '' }
-  ]);
+  // Ha van ID, betöltjük a meglévő edzés adatait
+  useEffect(() => {
+    if (id) {
+      const fetchWorkout = async () => {
+        try {
+          const token = localStorage.getItem('token');
+          const res = await axios.get(`http://localhost:5000/api/workouts`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          // Megkeressük a listából a konkrét edzést
+          const workoutToEdit = res.data.find(w => w._id === id);
+          if (workoutToEdit) {
+            setIsEditMode(true);
+            setPlanName(workoutToEdit.title);
+            // Átalakítjuk a formátumot a frontendnek (kell egy egyedi id a mappoláshoz)
+            setExercises(workoutToEdit.exercises.map(ex => ({ ...ex, id: Math.random() })));
+          }
+        } catch (err) { console.error(err); }
+      };
+      fetchWorkout();
+    }
+  }, [id]);
 
-  // Új gyakorlat sor hozzáadása
-  const addExercise = () => {
-    setExercises([...exercises, { id: Date.now(), name: '', sets: '', reps: '' }]);
-  };
-
-  // Gyakorlat adatainak frissítése gépeléskor
   const handleExerciseChange = (id, field, value) => {
-    const updatedExercises = exercises.map(ex =>
-      ex.id === id ? { ...ex, [field]: value } : ex
-    );
-    setExercises(updatedExercises);
+    setExercises(exercises.map(ex => ex.id === id ? { ...ex, [field]: value } : ex));
   };
 
-  // Gyakorlat törlése
-  const removeExercise = (id) => {
-    setExercises(exercises.filter(ex => ex.id !== id));
-  };
-
-  // Mentés gomb (egyelőre csak konzoloz)
-  const savePlan = (e) => {
+  const savePlan = async (e) => {
     e.preventDefault();
-    console.log('Mentésre váró terv:', { planName, exercises });
-    alert('Edzésterv sikeresen elmentve (jelenleg csak a konzolon)!');
-    navigate('/dashboard'); // Visszavisz a főoldalra
+    try {
+      const token = localStorage.getItem('token');
+      const payload = {
+        title: planName,
+        exercises: exercises.map(ex => ({
+          name: ex.name,
+          weight: Number(ex.weight),
+          reps: Number(ex.reps),
+          sets: Number(ex.sets)
+        }))
+      };
+
+      if (isEditMode) {
+        // MÓDOSÍTÁS (PUT)
+        await axios.put(`http://localhost:5000/api/workouts/${id}`, payload, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        alert('Edzésterv módosítva!');
+      } else {
+        // ÚJ MENTÉS (POST)
+        await axios.post('http://localhost:5000/api/workouts', payload, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        alert('Új edzésterv elmentve!');
+      }
+      navigate('/');
+    } catch (err) { alert('Hiba a mentésnél!'); }
   };
 
   return (
-    <div className="container" style={{ maxWidth: '800px', marginTop: '30px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2>Új Edzésterv Összeállítása ✍️</h2>
-        <button className="btn" style={{ backgroundColor: '#6c757d' }} onClick={() => navigate('/dashboard')}>
-          Vissza
-        </button>
-      </div>
+    <div className="container" style={{ maxWidth: '850px', margin: '30px auto', padding: '20px', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 0 10px rgba(0,0,0,0.1)' }}>
+      <h2>{isEditMode ? 'Edzésterv Szerkesztése ✏️' : 'Új Edzésterv Összeállítása ✍️'}</h2>
+      <form onSubmit={savePlan}>
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', fontWeight: 'bold' }}>Edzésterv Neve</label>
+          <input type="text" value={planName} onChange={(e) => setPlanName(e.target.value)} required style={{ width: '100%', padding: '12px' }} />
+        </div>
 
-      <div className="card">
-        <form onSubmit={savePlan}>
-          <div className="form-group">
-            <label>Edzésterv Neve (pl. Felsőtest nap)</label>
-            <input
-              type="text"
-              value={planName}
-              onChange={(e) => setPlanName(e.target.value)}
-              placeholder="Add meg a terv nevét..."
-              required
-              style={{ fontSize: '18px', padding: '12px' }}
-            />
+        {exercises.map((ex) => (
+          <div key={ex.id} style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+            <input type="text" placeholder="Gyakorlat" value={ex.name} onChange={(e) => handleExerciseChange(ex.id, 'name', e.target.value)} required style={{ flex: 2, padding: '8px' }} />
+            <input type="number" placeholder="Kör" value={ex.sets} onChange={(e) => handleExerciseChange(ex.id, 'sets', e.target.value)} required style={{ flex: 1, padding: '8px' }} />
+            <input type="number" placeholder="Kg" value={ex.weight} onChange={(e) => handleExerciseChange(ex.id, 'weight', e.target.value)} required style={{ flex: 1, padding: '8px' }} />
+            <input type="number" placeholder="Reps" value={ex.reps} onChange={(e) => handleExerciseChange(ex.id, 'reps', e.target.value)} required style={{ flex: 1, padding: '8px' }} />
+            <button type="button" onClick={() => setExercises(exercises.filter(e => e.id !== ex.id))} style={{backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px'}}>X</button>
           </div>
+        ))}
 
-          <h3 style={{ marginTop: '30px', marginBottom: '15px', borderBottom: '2px solid #eee', paddingBottom: '10px' }}>
-            Gyakorlatok
-          </h3>
-
-          {/* Dinamikus gyakorlat lista */}
-          {exercises.map((exercise, index) => (
-            <div key={exercise.id} style={{ display: 'flex', gap: '10px', marginBottom: '15px', alignItems: 'flex-end' }}>
-              <div style={{ flex: 2 }}>
-                <label style={{ fontSize: '12px', color: '#666' }}>Gyakorlat neve</label>
-                <input
-                  type="text"
-                  value={exercise.name}
-                  onChange={(e) => handleExerciseChange(exercise.id, 'name', e.target.value)}
-                  placeholder="pl. Fekvenyomás"
-                  required
-                />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label style={{ fontSize: '12px', color: '#666' }}>Sorozat (Sets)</label>
-                <input
-                  type="number"
-                  value={exercise.sets}
-                  onChange={(e) => handleExerciseChange(exercise.id, 'sets', e.target.value)}
-                  placeholder="pl. 4"
-                  min="1" required
-                />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label style={{ fontSize: '12px', color: '#666' }}>Ismétlés (Reps)</label>
-                <input
-                  type="number"
-                  value={exercise.reps}
-                  onChange={(e) => handleExerciseChange(exercise.id, 'reps', e.target.value)}
-                  placeholder="pl. 10"
-                  min="1" required
-                />
-              </div>
-              {/* Csak akkor engedjük törölni, ha több mint 1 gyakorlat van */}
-              {exercises.length > 1 && (
-                <button type="button" onClick={() => removeExercise(exercise.id)} className="btn" style={{ backgroundColor: '#dc3545', padding: '10px 15px' }}>
-                  X
-                </button>
-              )}
-            </div>
-          ))}
-
-          <button type="button" onClick={addExercise} className="btn" style={{ backgroundColor: '#17a2b8', marginBottom: '30px' }}>
-            + Új gyakorlat hozzáadása
-          </button>
-
-          <hr style={{ margin: '20px 0', border: 'none', borderTop: '1px solid #ccc' }} />
-
-          <button type="submit" className="btn" style={{ width: '100%', fontSize: '18px', padding: '15px' }}>
-            💾 Edzésterv Mentése
-          </button>
-        </form>
-      </div>
+        <button type="button" onClick={() => setExercises([...exercises, { id: Date.now(), name: '', weight: '', reps: '', sets: '' }])} style={{ marginBottom: '20px' }}>+ Új gyakorlat hozzáadása</button>
+        <button type="submit" style={{ width: '100%', padding: '15px', backgroundColor: isEditMode ? '#007BFF' : '#28a745', color: 'white', fontWeight: 'bold' }}>
+          {isEditMode ? '💾 Módosítások mentése' : '💾 Edzésterv Mentése'}
+        </button>
+      </form>
     </div>
   );
 };
